@@ -7,6 +7,7 @@
 /public/storage
 /storage/*.key
 /storage/pail
+/storage
 /resources/js/actions
 /resources/js/routes
 /resources/js/wayfinder
@@ -27,3 +28,5 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+/.claude
+.claude

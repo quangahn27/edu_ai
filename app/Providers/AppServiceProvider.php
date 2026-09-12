@@ -2,9 +2,13 @@
 
 namespace App\Providers;
 
+use App\Services\AI\AIProvider;
+use App\Services\AI\GeminiService;
 use Carbon\CarbonImmutable;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -15,7 +19,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(AIProvider::class, GeminiService::class);
     }
 
     /**
@@ -24,6 +28,17 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->configureRateLimiting();
+    }
+
+    /**
+     * Configure rate limits for AI endpoints.
+     */
+    protected function configureRateLimiting(): void
+    {
+        RateLimiter::for('ai-tutor', fn ($request) => Limit::perMinute(20)->by($request->user()?->id));
+        RateLimiter::for('ai-quiz-generator', fn ($request) => Limit::perMinute(5)->by($request->user()?->id));
+        RateLimiter::for('ai-essay-grading', fn ($request) => Limit::perMinute(10)->by($request->user()?->id));
     }
 
     /**
